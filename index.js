@@ -7,6 +7,19 @@ function formatQueryParams(params){
   return queryItems.join('&');
 }
 
+function displayResults(responseJson, maxResults){
+  $('#results-list').empty();
+  for(let i = 0; i< responseJson.articles.length & i<maxResults; i++){
+    $('#results-list').append(
+      `<li><h3><a href="${responseJson.articles[i].url}">${responseJson.articles[i].title}</a></h3>
+      <p>${responseJson.articles[i].source.name}</p>
+      <p>By ${responseJson.articles[i].author}</p>
+      <p>${responseJson.articles[i].description}</p>
+      <img src='${responseJson.articles[i].urlToImage}'>
+      </li>`
+    );}
+  $('#results').removeClass('hidden');
+}
 function getNews(query, maxResults=10) {
   const params = {
     q: query,
@@ -22,8 +35,17 @@ function getNews(query, maxResults=10) {
   };
 
   fetch(url, options)
-    .then(response => response.json())
-    .then(responseJson => console.log(responseJson));
+    .then(response => { 
+      if(response.ok){
+        return response.json();
+      }
+      throw new Error(response.statusText);
+    })
+    .then(responseJson => displayResults(responseJson, maxResults))
+    .catch(err => { $('#js-error-message')
+      .text(`Something went wrong: ${err.message}`);
+    });
+    
 }
 
 function watchForm(){
@@ -35,4 +57,4 @@ function watchForm(){
   });
 }
 
-$(getNews);
+$(watchForm);
